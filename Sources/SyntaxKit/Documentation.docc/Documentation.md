@@ -429,6 +429,7 @@ struct MembersMacro: MemberMacro {
 - ``ParameterExp``
 - ``PlusAssign``
 - ``Return``
+- ``SubscriptExp``
 - ``VariableExp``
 - ``DictionaryExpr``
 

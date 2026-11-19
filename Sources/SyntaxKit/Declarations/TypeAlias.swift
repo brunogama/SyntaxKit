@@ -33,14 +33,24 @@ public import SwiftSyntax
 public struct TypeAlias: CodeBlock, Sendable {
   private let name: String
   private let existingType: String
+  private var accessModifier: AccessModifier?
   private var attributes: [AttributeInfo] = []
 
+  /// The SwiftSyntax representation of the typealias declaration.
   public var syntax: any SyntaxProtocol {
+    // Build access modifier
+    var modifiers: DeclModifierListSyntax = []
+    if let access = accessModifier {
+      modifiers = DeclModifierListSyntax([
+        DeclModifierSyntax(name: .keyword(access.keyword, trailingTrivia: .space))
+      ])
+    }
+
     // `typealias` keyword token
     let keyword = TokenSyntax.keyword(.typealias, trailingTrivia: .space)
 
-    // Alias identifier
-    let identifier = TokenSyntax.identifier(name, trailingTrivia: .space)
+    // Alias identifier; the initializer clause supplies the spacing around `=`
+    let identifier = TokenSyntax.identifier(name)
 
     // Initializer clause – `= ExistingType`
     let initializer = TypeInitializerClauseSyntax(
@@ -50,6 +60,7 @@ public struct TypeAlias: CodeBlock, Sendable {
 
     return TypeAliasDeclSyntax(
       attributes: buildAttributeList(from: attributes),
+      modifiers: modifiers,
       typealiasKeyword: keyword,
       name: identifier,
       initializer: initializer
@@ -63,6 +74,15 @@ public struct TypeAlias: CodeBlock, Sendable {
   public init(_ name: String, equals type: String) {
     self.name = name
     self.existingType = type
+  }
+
+  /// Sets the access modifier for the typealias declaration.
+  /// - Parameter access: The access modifier.
+  /// - Returns: A copy of the typealias with the access modifier set.
+  public func access(_ access: AccessModifier) -> Self {
+    var copy = self
+    copy.accessModifier = access
+    return copy
   }
 
   /// Adds an attribute to the typealias declaration.

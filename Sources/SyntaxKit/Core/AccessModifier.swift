@@ -36,6 +36,7 @@ public enum AccessModifier: CaseIterable, Sendable, Equatable {
   case `internal`
   case `fileprivate`
   case `open`
+  case `package`
 
   /// Returns the corresponding SwiftSyntax Keyword for this access modifier.
   public var keyword: Keyword {
@@ -50,6 +51,8 @@ public enum AccessModifier: CaseIterable, Sendable, Equatable {
       return .fileprivate
     case .open:
       return .open
+    case .package:
+      return .package
     }
   }
 }

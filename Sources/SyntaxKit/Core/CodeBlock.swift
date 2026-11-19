@@ -64,4 +64,13 @@ extension CodeBlock {
   ) -> any CodeBlock {
     FunctionCallExp(base: self, methodName: name, parameters: parameters())
   }
+
+  /// Subscripts this code block with the given arguments.
+  /// - Parameter arguments: A closure that returns the arguments for the subscript.
+  /// - Returns: A code block representing the subscript expression.
+  public func `subscript`(@ParameterExpBuilderResult _ arguments: () -> [ParameterExp])
+    -> any CodeBlock
+  {
+    SubscriptExp(base: self, arguments)
+  }
 }
