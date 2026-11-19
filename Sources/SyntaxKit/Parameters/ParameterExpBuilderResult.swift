@@ -32,28 +32,38 @@ import Foundation
 /// A result builder for creating arrays of ``ParameterExp``s.
 @resultBuilder
 public enum ParameterExpBuilderResult: Sendable, Equatable {
-  /// Builds a block of ``ParameterExp``s.
-  public static func buildBlock(_ components: ParameterExp...) -> [ParameterExp] {
-    components
+  /// Wraps a single parameter expression so it can be combined with others.
+  public static func buildExpression(_ expression: ParameterExp) -> [ParameterExp] {
+    [expression]
   }
 
-  /// Builds an optional ``ParameterExp``.
-  public static func buildOptional(_ component: ParameterExp?) -> [ParameterExp] {
-    component.map { [$0] } ?? []
+  /// Passes an existing array of parameter expressions through unchanged.
+  public static func buildExpression(_ expression: [ParameterExp]) -> [ParameterExp] {
+    expression
   }
 
-  /// Builds a ``ParameterExp`` from an `if` statement.
-  public static func buildEither(first: ParameterExp) -> [ParameterExp] {
-    [first]
+  /// Combines the parameter expressions of a block, including those produced by loops and conditions.
+  public static func buildBlock(_ components: [ParameterExp]...) -> [ParameterExp] {
+    components.flatMap { $0 }
   }
 
-  /// Builds a ``ParameterExp`` from an `else` statement.
-  public static func buildEither(second: ParameterExp) -> [ParameterExp] {
-    [second]
+  /// Builds the parameter expressions of an `if` statement without an `else` branch.
+  public static func buildOptional(_ component: [ParameterExp]?) -> [ParameterExp] {
+    component ?? []
   }
 
-  /// Builds an array of ``ParameterExp``s from a `for` loop.
-  public static func buildArray(_ components: [ParameterExp]) -> [ParameterExp] {
-    components
+  /// Builds the parameter expressions of the first branch of an `if`-`else` or `switch` statement.
+  public static func buildEither(first component: [ParameterExp]) -> [ParameterExp] {
+    component
+  }
+
+  /// Builds the parameter expressions of the second branch of an `if`-`else` or `switch` statement.
+  public static func buildEither(second component: [ParameterExp]) -> [ParameterExp] {
+    component
+  }
+
+  /// Flattens the parameter expressions produced by each iteration of a `for` loop.
+  public static func buildArray(_ components: [[ParameterExp]]) -> [ParameterExp] {
+    components.flatMap { $0 }
   }
 }

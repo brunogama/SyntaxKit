@@ -82,22 +82,31 @@ extension Closure {
     return ClosureParameterClauseSyntax(
       leftParen: .leftParenToken(),
       parameters: ClosureParameterListSyntax(
-        parameters.map(buildParameterSyntax)
+        parameters.enumerated().map { index, param in
+          buildParameterSyntax(from: param, isLast: index == parameters.count - 1)
+        }
       ),
       rightParen: .rightParenToken()
     )
   }
 
   /// Builds parameter syntax from a closure parameter.
-  private func buildParameterSyntax(from param: ClosureParameter) -> ClosureParameterSyntax {
-    ClosureParameterSyntax(
+  ///
+  /// The colon appears only before a type, and every parameter but the last is
+  /// followed by a comma, so `(first, second)` and `(first: Int, second: Int)` both render.
+  private func buildParameterSyntax(
+    from param: ClosureParameter,
+    isLast: Bool
+  ) -> ClosureParameterSyntax {
+    let type = param.type?.typeSyntax as? TypeSyntax
+    return ClosureParameterSyntax(
       attributes: AttributeListSyntax([]),
       firstName: .identifier(param.name),
       secondName: nil,
-      colon: param.name.isEmpty ? nil : .colonToken(trailingTrivia: .space),
-      type: param.type?.typeSyntax as? TypeSyntax,
+      colon: type == nil || param.name.isEmpty ? nil : .colonToken(trailingTrivia: .space),
+      type: type,
       ellipsis: nil,
-      trailingComma: nil
+      trailingComma: isLast ? nil : .commaToken(trailingTrivia: .space)
     )
   }
 

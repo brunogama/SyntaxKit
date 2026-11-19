@@ -34,16 +34,17 @@ extension Variable {
   internal func buildModifiers() -> DeclModifierListSyntax {
     var modifiers: [DeclModifierSyntax] = []
 
+    // Access comes first, matching Swift convention: `public static let`.
+    if let access = accessModifier {
+      modifiers.append(buildAccessModifier(access))
+    }
+
     if isStatic {
       modifiers.append(buildStaticModifier())
     }
 
     if isAsync {
       modifiers.append(buildAsyncModifier())
-    }
-
-    if let access = accessModifier {
-      modifiers.append(buildAccessModifier(access))
     }
 
     return DeclModifierListSyntax(modifiers)

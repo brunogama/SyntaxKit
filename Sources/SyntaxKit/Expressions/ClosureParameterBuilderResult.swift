@@ -30,38 +30,38 @@
 /// A result builder for creating closure parameter lists.
 @resultBuilder
 public enum ClosureParameterBuilderResult: Sendable, Equatable {
-  /// Builds a block of closure parameters.
-  /// - Parameter components: The closure parameters to combine.
-  /// - Returns: An array of closure parameters.
-  public static func buildBlock(_ components: ClosureParameter...) -> [ClosureParameter] {
-    components
+  /// Wraps a single closure parameter so it can be combined with others.
+  public static func buildExpression(_ expression: ClosureParameter) -> [ClosureParameter] {
+    [expression]
   }
 
-  /// Builds an optional closure parameter.
-  /// - Parameter component: The optional closure parameter.
-  /// - Returns: An array containing the parameter if present, otherwise empty.
-  public static func buildOptional(_ component: ClosureParameter?) -> [ClosureParameter] {
-    component.map { [$0] } ?? []
+  /// Passes an existing array of closure parameters through unchanged.
+  public static func buildExpression(_ expression: [ClosureParameter]) -> [ClosureParameter] {
+    expression
   }
 
-  /// Builds the first branch of an either expression.
-  /// - Parameter component: The closure parameter from the first branch.
-  /// - Returns: An array containing the parameter.
-  public static func buildEither(first component: ClosureParameter) -> [ClosureParameter] {
-    [component]
+  /// Combines the closure parameters of a block, including those produced by loops and conditions.
+  public static func buildBlock(_ components: [ClosureParameter]...) -> [ClosureParameter] {
+    components.flatMap { $0 }
   }
 
-  /// Builds the second branch of an either expression.
-  /// - Parameter component: The closure parameter from the second branch.
-  /// - Returns: An array containing the parameter.
-  public static func buildEither(second component: ClosureParameter) -> [ClosureParameter] {
-    [component]
+  /// Builds the closure parameters of an `if` statement without an `else` branch.
+  public static func buildOptional(_ component: [ClosureParameter]?) -> [ClosureParameter] {
+    component ?? []
   }
 
-  /// Builds an array of closure parameters.
-  /// - Parameter components: The arrays of closure parameters to flatten.
-  /// - Returns: A flattened array of closure parameters.
-  public static func buildArray(_ components: [ClosureParameter]) -> [ClosureParameter] {
-    components
+  /// Builds the closure parameters of the first branch of an `if`-`else` or `switch` statement.
+  public static func buildEither(first component: [ClosureParameter]) -> [ClosureParameter] {
+    component
+  }
+
+  /// Builds the closure parameters of the second branch of an `if`-`else` or `switch` statement.
+  public static func buildEither(second component: [ClosureParameter]) -> [ClosureParameter] {
+    component
+  }
+
+  /// Flattens the closure parameters produced by each iteration of a `for` loop.
+  public static func buildArray(_ components: [[ClosureParameter]]) -> [ClosureParameter] {
+    components.flatMap { $0 }
   }
 }

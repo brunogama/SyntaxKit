@@ -165,4 +165,10 @@ internal struct VariableStaticTests {
     let staticCount = generated.components(separatedBy: "static").count - 1
     #expect(staticCount == 1)
   }
+
+  @Test internal func testAccessModifierPrecedesStatic() {
+    let variable = Variable(.let, name: "shared", equals: Init("Cache")).static().access(.public)
+
+    #expect(variable.generateCode().normalize() == "public static let shared = Cache()")
+  }
 }
