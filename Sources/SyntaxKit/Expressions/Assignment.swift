@@ -31,11 +31,12 @@ public import SwiftSyntax
 
 /// An assignment expression.
 public struct Assignment: CodeBlock {
-  private let target: String
+  private let targetExpr: ExprSyntax
   private let valueExpr: ExprSyntax
 
+  /// The SwiftSyntax representation of the assignment statement.
   public var syntax: any SyntaxProtocol {
-    let left = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
+    let left = targetExpr
     let right = valueExpr
     let assignmentExpr = ExprSyntax(
       SequenceExprSyntax(
@@ -52,15 +53,21 @@ public struct Assignment: CodeBlock {
     return StmtSyntax(ExpressionStmtSyntax(expression: assignmentExpr))
   }
 
-  /// Creates an assignment where the value is an expression.
+  /// Creates an assignment with structured target and value expressions.
+  public init(_ target: any ExprCodeBlock, _ value: any ExprCodeBlock) {
+    self.targetExpr = target.exprSyntax
+    self.valueExpr = value.exprSyntax
+  }
+
+  /// Creates an assignment where the target is an identifier and the value is an expression.
   public init(_ target: String, _ value: any ExprCodeBlock) {
-    self.target = target
+    self.targetExpr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
     self.valueExpr = value.exprSyntax
   }
 
   /// Creates an assignment where the value is a literal.
   public init(_ target: String, _ literal: Literal) {
-    self.target = target
+    self.targetExpr = ExprSyntax(DeclReferenceExprSyntax(baseName: .identifier(target)))
     self.valueExpr = literal.exprSyntax
   }
 

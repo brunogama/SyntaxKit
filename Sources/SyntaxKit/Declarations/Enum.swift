@@ -33,8 +33,9 @@ public import SwiftSyntax
 public struct Enum: CodeBlock, Sendable {
   private let name: String
   private let members: [any CodeBlock]
-  private var inheritance: [String] = []
+  private var inheritance: [any TypeRepresentable] = []
   private var attributes: [AttributeInfo] = []
+  private var accessModifier: AccessModifier?
 
   /// The SwiftSyntax representation of this enum declaration.
   public var syntax: any SyntaxProtocol {
@@ -44,9 +45,7 @@ public struct Enum: CodeBlock, Sendable {
     var inheritanceClause: InheritanceClauseSyntax?
     if !inheritance.isEmpty {
       let inheritedTypes = inheritance.map { type in
-        InheritedTypeSyntax(
-          type: IdentifierTypeSyntax(name: .identifier(type))
-        )
+        InheritedTypeSyntax(type: type.typeSyntax)
       }
       inheritanceClause = InheritanceClauseSyntax(
         colon: .colonToken(),
@@ -78,8 +77,16 @@ public struct Enum: CodeBlock, Sendable {
       rightBrace: .rightBraceToken(leadingTrivia: .newline)
     )
 
+    var modifiers: DeclModifierListSyntax = []
+    if let accessModifier {
+      modifiers = DeclModifierListSyntax([
+        DeclModifierSyntax(name: .keyword(accessModifier.keyword, trailingTrivia: .space))
+      ])
+    }
+
     return EnumDeclSyntax(
       attributes: buildAttributeList(from: attributes),
+      modifiers: modifiers,
       enumKeyword: enumKeyword,
       name: identifier,
       inheritanceClause: inheritanceClause,
@@ -104,6 +111,24 @@ public struct Enum: CodeBlock, Sendable {
   public func inherits(_ inheritance: String...) -> Self {
     var copy = self
     copy.inheritance = inheritance
+    return copy
+  }
+
+  /// Sets structured inheritance for the enum.
+  /// - Parameter inheritance: The types to inherit from.
+  /// - Returns: A copy of the enum with the inheritance set.
+  public func inherits(_ inheritance: any TypeRepresentable...) -> Self {
+    var copy = self
+    copy.inheritance = inheritance
+    return copy
+  }
+
+  /// Sets the access modifier for the enum declaration.
+  /// - Parameter access: The access modifier.
+  /// - Returns: A copy of the enum with the access modifier set.
+  public func access(_ access: AccessModifier) -> Self {
+    var copy = self
+    copy.accessModifier = access
     return copy
   }
 

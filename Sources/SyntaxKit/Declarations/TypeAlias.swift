@@ -32,7 +32,7 @@ public import SwiftSyntax
 /// A Swift `typealias` declaration.
 public struct TypeAlias: CodeBlock, Sendable {
   private let name: String
-  private let existingType: String
+  private let existingType: TypeSyntax
   private var accessModifier: AccessModifier?
   private var attributes: [AttributeInfo] = []
 
@@ -55,7 +55,7 @@ public struct TypeAlias: CodeBlock, Sendable {
     // Initializer clause – `= ExistingType`
     let initializer = TypeInitializerClauseSyntax(
       equal: .equalToken(leadingTrivia: .space, trailingTrivia: .space),
-      value: IdentifierTypeSyntax(name: .identifier(existingType))
+      value: existingType
     )
 
     return TypeAliasDeclSyntax(
@@ -73,7 +73,16 @@ public struct TypeAlias: CodeBlock, Sendable {
   ///   - type: The existing type that is being aliased.
   public init(_ name: String, equals type: String) {
     self.name = name
-    self.existingType = type
+    self.existingType = type.typeSyntax
+  }
+
+  /// Creates a `typealias` declaration from a structured type representation.
+  /// - Parameters:
+  ///   - name: The new name that will alias the existing type.
+  ///   - type: The existing type that is being aliased.
+  public init(_ name: String, equals type: any TypeRepresentable) {
+    self.name = name
+    self.existingType = type.typeSyntax
   }
 
   /// Sets the access modifier for the typealias declaration.

@@ -340,10 +340,10 @@ public struct MemberwiseInitMacro: MemberMacro {
                 parameters.append(param)
                 
                 // Create assignment statement
-                let assignment = Assignment {
-                    MemberAccess(base: "self", member: identifier.trimmed.text)
+                let assignment = Assignment(
+                    MemberAccess(base: "self", member: identifier.trimmed.text),
                     VariableExp(identifier.trimmed.text)
-                }
+                )
                 assignments.append(assignment)
             }
         }
@@ -449,13 +449,13 @@ public struct ValidatedMacro: AccessorMacro {
             }
             
             // Assign if validation passes
-            Assignment {
-                VariableExp(storageName)
+            Assignment(
+                VariableExp(storageName),
                 VariableExp("newValue")
-            }
+            )
         }
         
-        return [getter.syntax, setter.syntax]
+        return [getter.accessorSyntax, setter.accessorSyntax]
     }
     
     private static func extractArgument(from node: AttributeSyntax, named: String) -> String? {
@@ -564,10 +564,10 @@ public struct BuilderMacro: PeerMacro {
             }
             .returns(builderName)
             .body {
-                Assignment {
-                    MemberAccess(base: "self", member: property.name)
+                Assignment(
+                    MemberAccess(base: "self", member: property.name),
                     VariableExp(property.name)
-                }
+                )
                 Return {
                     VariableExp("self")
                 }
